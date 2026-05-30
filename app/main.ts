@@ -30,7 +30,7 @@ async function main() {
     tools: TOOLS,
   });
 
-  const response = result.choices[0].message;
+  const response = result.choices[result.choices.length - 1].message;
 
   messages.push(response);
 
