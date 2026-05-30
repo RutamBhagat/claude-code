@@ -24,32 +24,37 @@ async function main() {
     { role: "user", content: prompt },
   ];
 
-  const result = await client.chat.completions.create({
-    model: "anthropic/claude-haiku-4.5",
-    messages: messages,
-    tools: TOOLS,
-  });
+  let finishReason: string | undefined;
 
-  const response = result.choices[result.choices.length - 1].message;
-
-  messages.push(response);
-
-  for (const toolCall of response.tool_calls ?? []) {
-    if (toolCall.type !== "function") continue;
-
-    const toolName = toolCall.function.name;
-    const toolArgs = JSON.parse(toolCall.function.arguments);
-
-    if (!isToolName(toolName)) {
-      throw new Error(`unknown tool: ${toolName}`);
-    }
-
-    const toolResponse = await TOOL_MAPPING[toolName](toolArgs);
-    messages.push({
-      role: "tool",
-      tool_call_id: toolCall.id,
-      content: toolResponse, // readToolFunction returns plain text
+  while (finishReason !== "stop") {
+    const result = await client.chat.completions.create({
+      model: "anthropic/claude-haiku-4.5",
+      messages: messages,
+      tools: TOOLS,
     });
+
+    const response = result.choices[result.choices.length - 1].message;
+    finishReason = result.choices[result.choices.length - 1].finish_reason;
+
+    messages.push(response);
+
+    for (const toolCall of response.tool_calls ?? []) {
+      if (toolCall.type !== "function") continue;
+
+      const toolName = toolCall.function.name;
+      const toolArgs = JSON.parse(toolCall.function.arguments);
+
+      if (!isToolName(toolName)) {
+        throw new Error(`unknown tool: ${toolName}`);
+      }
+
+      const toolResponse = await TOOL_MAPPING[toolName](toolArgs);
+      messages.push({
+        role: "tool",
+        tool_call_id: toolCall.id,
+        content: toolResponse, // readToolFunction returns plain text
+      });
+    }
   }
 
   console.log(messages[messages.length - 1].content);
