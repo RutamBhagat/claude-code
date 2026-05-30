@@ -2,12 +2,11 @@ import OpenAI from "openai";
 
 async function main() {
   const [, , flag, prompt] = process.argv;
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  const baseURL =
-    process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1";
+  const apiKey = process.env.OPENAI_API_KEY;
+  const baseURL = process.env.OPENAI_PROXY_URL ?? "https://api.openai.com/v1";
 
   if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY is not set");
+    throw new Error("OPENAI_API_KEY is not set");
   }
   if (flag !== "-p" || !prompt) {
     throw new Error("error: -p flag is required");
