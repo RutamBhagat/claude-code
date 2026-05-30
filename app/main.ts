@@ -31,8 +31,8 @@ async function main() {
 
   while (true) {
     const result = await client.chat.completions.create({
-      model: "anthropic/claude-haiku-4.5",
-      // model: "gpt-5.5",
+      // model: "anthropic/claude-haiku-4.5",
+      model: "gpt-5.5",
       messages: messages,
       tools: TOOLS,
     });
