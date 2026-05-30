@@ -18,7 +18,11 @@ export const readTool: ChatCompletionTool = {
   },
 };
 
-export const readToolFunction = async (file_path: string) => {
+export const readToolFunction = async ({
+  file_path,
+}: {
+  file_path: string;
+}) => {
   const file = Bun.file(file_path);
   const contents = await file.text();
   return contents;
