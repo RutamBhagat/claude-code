@@ -52,7 +52,7 @@ async function main() {
       messages.push({
         role: "tool",
         tool_call_id: toolCall.id,
-        content: toolResponse, // readToolFunction returns plain text
+        content: toolResponse,
       });
     }
   }
