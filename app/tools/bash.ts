@@ -20,10 +20,9 @@ export const bashTool: ChatCompletionTool = {
 };
 
 export const bashToolFunc = async ({ command }: { command: string }) => {
-  try {
-    await $`bash -c ${command}`.quiet();
-    return "Command executed successfully";
-  } catch (error) {
-    return `Command failed: ${error}`;
+  const result = await $`bash -c ${command}`.quiet().nothrow();
+  if (result.exitCode === 0) {
+    return `${result.stdout}`;
   }
+  return `${result.stderr}`;
 };
