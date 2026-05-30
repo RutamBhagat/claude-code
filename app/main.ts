@@ -21,22 +21,29 @@ async function main() {
   });
 
   const messages: ChatCompletionMessageParam[] = [
+    {
+      role: "system",
+      content:
+        "You are a helpful assistant. who has access to multiple tools to help you with your tasks. you can use these tools to help you with your tasks. you should recursively use these tools to help you with your tasks.",
+    },
     { role: "user", content: prompt },
   ];
 
-  let finishReason: string | undefined;
-
-  while (finishReason !== "stop") {
+  while (true) {
     const result = await client.chat.completions.create({
       model: "anthropic/claude-haiku-4.5",
+      // model: "gpt-5.5",
       messages: messages,
       tools: TOOLS,
     });
 
-    const { message, finish_reason } = result.choices[0];
-    finishReason = finish_reason;
+    const { message } = result.choices[0];
 
     messages.push(message);
+
+    if (!message.tool_calls) {
+      break;
+    }
 
     for (const toolCall of message.tool_calls ?? []) {
       if (toolCall.type !== "function") continue;

@@ -30,7 +30,7 @@ export const writeToolFunc = async ({
   content: string;
 }) => {
   const file = Bun.file(file_path);
-  await file.write(content);
+  await Bun.write(file, content);
 
   return "File written successfully";
 };
