@@ -19,7 +19,7 @@ async function main() {
   });
 
   const response = await client.chat.completions.create({
-    model: "gpt-5.4-mini",
+    model: "anthropic/claude-haiku-4.5",
     messages: [{ role: "user", content: prompt }],
   });
 
