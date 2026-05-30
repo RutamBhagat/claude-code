@@ -1,5 +1,6 @@
 import OpenAI from "openai";
-import { TOOLS } from "./tools";
+import { TOOLS, TOOL_MAPPING, isToolName } from "./tools";
+import type { ChatCompletionMessageParam } from "openai/resources";
 
 async function main() {
   const [, , flag, prompt] = process.argv;
@@ -19,21 +20,39 @@ async function main() {
     baseURL: baseURL,
   });
 
-  const response = await client.chat.completions.create({
+  const messages: ChatCompletionMessageParam[] = [
+    { role: "user", content: prompt },
+  ];
+
+  const result = await client.chat.completions.create({
     model: "anthropic/claude-haiku-4.5",
-    messages: [{ role: "user", content: prompt }],
+    messages: messages,
     tools: TOOLS,
   });
 
-  if (!response.choices || response.choices.length === 0) {
-    throw new Error("no choices in response");
+  const response = result.choices[0].message;
+
+  messages.push(response);
+
+  for (const toolCall of response.tool_calls ?? []) {
+    if (toolCall.type !== "function") continue;
+
+    const toolName = toolCall.function.name;
+    const toolArgs = JSON.parse(toolCall.function.arguments);
+
+    if (!isToolName(toolName)) {
+      throw new Error(`unknown tool: ${toolName}`);
+    }
+
+    const toolResponse = await TOOL_MAPPING[toolName](toolArgs);
+    messages.push({
+      role: "tool",
+      tool_call_id: toolCall.id,
+      content: toolResponse, // readToolFunction returns plain text
+    });
   }
 
-  // You can use print statements as follows for debugging, they'll be visible when running tests.
-  console.error("Logs from your program will appear here!");
-
-  // TODO: Uncomment the lines below to pass the first stage
-  console.log(response.choices[0].message.content);
+  console.log(messages[messages.length - 1].content);
 }
 
 main();

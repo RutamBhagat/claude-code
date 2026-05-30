@@ -1,9 +1,9 @@
 import type { ChatCompletionTool } from "openai/resources";
 
-const readTool: ChatCompletionTool = {
+export const readTool: ChatCompletionTool = {
   type: "function",
   function: {
-    name: "Read",
+    name: "readToolFunction",
     description: "Read and return the contents of a file",
     parameters: {
       type: "object",
@@ -18,4 +18,8 @@ const readTool: ChatCompletionTool = {
   },
 };
 
-export default readTool;
+export const readToolFunction = async (file_path: string) => {
+  const file = Bun.file(file_path);
+  const contents = await file.text();
+  return contents;
+};
