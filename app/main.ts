@@ -33,12 +33,12 @@ async function main() {
       tools: TOOLS,
     });
 
-    const response = result.choices[result.choices.length - 1].message;
-    finishReason = result.choices[result.choices.length - 1].finish_reason;
+    const { message, finish_reason } = result.choices[0];
+    finishReason = finish_reason;
 
-    messages.push(response);
+    messages.push(message);
 
-    for (const toolCall of response.tool_calls ?? []) {
+    for (const toolCall of message.tool_calls ?? []) {
       if (toolCall.type !== "function") continue;
 
       const toolName = toolCall.function.name;
