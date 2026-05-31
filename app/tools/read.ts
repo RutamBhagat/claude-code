@@ -1,24 +1,13 @@
-import type { ChatCompletionTool } from "openai/resources";
+import { tool } from "ai";
+import { z } from "zod";
 
-export const readTool: ChatCompletionTool = {
-  type: "function",
-  function: {
-    name: "readToolFunc",
-    description: "Read and return the contents of a file",
-    parameters: {
-      type: "object",
-      properties: {
-        file_path: {
-          type: "string",
-          description: "The path to the file to read",
-        },
-      },
-      required: ["file_path"],
-    },
+export const readTool = tool({
+  description: "Read and return the contents of a file",
+  inputSchema: z.object({
+    file_path: z.string().describe("The path to the file to read"),
+  }),
+  execute: async ({ file_path }) => {
+    const file = Bun.file(file_path);
+    return await file.text();
   },
-};
-
-export const readToolFunc = async ({ file_path }: { file_path: string }) => {
-  const file = Bun.file(file_path);
-  return await file.text();
-};
+});

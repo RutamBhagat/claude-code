@@ -1,36 +1,16 @@
-import type { ChatCompletionTool } from "openai/resources";
+import { tool } from "ai";
+import { z } from "zod";
 
-export const writeTool: ChatCompletionTool = {
-  type: "function",
-  function: {
-    name: "writeToolFunc",
-    description: "Write content to a file",
-    parameters: {
-      type: "object",
-      properties: {
-        file_path: {
-          type: "string",
-          description: "The path of the file to write to",
-        },
-        content: {
-          type: "string",
-          description: "The content to write to the file",
-        },
-      },
-      required: ["file_path", "content"],
-    },
+export const writeTool = tool({
+  description: "Write content to a file",
+  inputSchema: z.object({
+    file_path: z.string().describe("The path of the file to write to"),
+    content: z.string().describe("The content to write to the file"),
+  }),
+  execute: async ({ file_path, content }) => {
+    const file = Bun.file(file_path);
+    await Bun.write(file, content);
+
+    return "File written successfully";
   },
-};
-
-export const writeToolFunc = async ({
-  file_path,
-  content,
-}: {
-  file_path: string;
-  content: string;
-}) => {
-  const file = Bun.file(file_path);
-  await Bun.write(file, content);
-
-  return "File written successfully";
-};
+});
