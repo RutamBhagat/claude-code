@@ -28,6 +28,23 @@ async function main() {
     prompt,
     tools: TOOLS,
     stopWhen: isLoopFinished(),
+    providerOptions: {
+      openai: {
+        reasoningEffort: "medium",
+      },
+    },
+    onStepFinish(step) {
+      if (step.reasoningText) {
+        console.error(`[reasoning] ${step.reasoningText}`);
+      }
+    },
+    experimental_onToolCallFinish(event) {
+      if (event.success) {
+        console.error(`[tool:${event.toolCall.toolName}]`, event.output);
+      } else {
+        console.error(`[tool:${event.toolCall.toolName}:error]`, event.error);
+      }
+    },
   });
 
   console.log(result.text);
